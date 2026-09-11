@@ -107,7 +107,8 @@ export const analyzeWaves = createServerFn({ method: "POST" })
 
     const delays = [0, 1200, 3000];
     for (let attempt = 0; attempt < delays.length; attempt += 1) {
-      if (delays[attempt] > 0) await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+      const delay = delays[attempt] ?? 0;
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
       const response = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
         method: "POST",
         headers: {
