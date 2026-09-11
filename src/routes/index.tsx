@@ -145,7 +145,7 @@ function Index() {
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
                 {samples.map((sample) => <button key={sample.name} onClick={() => selectImage(sample.src, sample.name)} aria-label={`Use ${sample.name} sample`} className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${image === sample.src ? "border-analysis" : "border-transparent hover:border-border"}`}><img src={sample.src} alt="" loading="lazy" className="size-full object-cover" width={1280} height={800} /><span className="absolute inset-x-0 bottom-0 bg-image-stage/85 py-1 text-[9px] font-semibold">{sample.name}</span></button>)}
               </div>
-              <input ref={inputRef} className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => handleUpload(event.target.files?.[0])} />
+              <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => handleUpload(event.target.files?.[0])} style={{ display: "none" }} />
               <Button variant="outline" onClick={() => inputRef.current?.click()}><Upload />Upload image</Button>
             </div>
             {error && <div className="mt-4 flex items-start justify-between gap-4 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"><span>{error}</span><Button variant="ghost" size="sm" onClick={runAnalysis}><RefreshCw />Retry</Button></div>}
