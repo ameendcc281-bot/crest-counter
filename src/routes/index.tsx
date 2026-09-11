@@ -29,6 +29,8 @@ const samples = [
   { name: "Open swell", src: swellWaves },
 ];
 
+const initialSample = samples[0] ?? { name: "Shore sets", src: aerialWaves };
+
 async function imageToDataUrl(src: string) {
   const response = await fetch(src);
   const blob = await response.blob();
@@ -41,8 +43,8 @@ async function imageToDataUrl(src: string) {
 }
 
 function Index() {
-  const [image, setImage] = useState(samples[0].src);
-  const [imageName, setImageName] = useState(samples[0].name);
+  const [image, setImage] = useState(initialSample.src);
+  const [imageName, setImageName] = useState(initialSample.name);
   const [analysis, setAnalysis] = useState<WaveAnalysis | null>(null);
   const [activeWave, setActiveWave] = useState<number | null>(null);
   const [showOverlay, setShowOverlay] = useState(true);
