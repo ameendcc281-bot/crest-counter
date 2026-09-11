@@ -9,21 +9,22 @@ const AnalyzeInput = z.object({
     .refine((value) => /^data:image\/(jpeg|png|webp);base64,/.test(value), "Unsupported image"),
 });
 
-export type WaveDetection = {
+export type StarDetection = {
   id: number;
   confidence: number;
   label: string;
-  points: Array<{ x: number; y: number }>;
+  center: { x: number; y: number };
+  radius: number;
 };
 
-export type WaveAnalysis = {
+export type StarAnalysis = {
   count: number;
   confidence: number;
   summary: string;
-  detections: WaveDetection[];
+  detections: StarDetection[];
 };
 
-const waveSchema = {
+const starSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -39,17 +40,15 @@ const waveSchema = {
           id: { type: "integer" },
           confidence: { type: "number" },
           label: { type: "string" },
-          points: {
-            type: "array",
-            items: {
-              type: "object",
-              additionalProperties: false,
-              properties: { x: { type: "number" }, y: { type: "number" } },
-              required: ["x", "y"],
-            },
+          center: {
+            type: "object",
+            additionalProperties: false,
+            properties: { x: { type: "number" }, y: { type: "number" } },
+            required: ["x", "y"],
           },
+          radius: { type: "number" },
         },
-        required: ["id", "confidence", "label", "points"],
+        required: ["id", "confidence", "label", "center", "radius"],
       },
     },
   },
@@ -72,9 +71,9 @@ function parseSseText(text: string) {
   return output;
 }
 
-export const analyzeWaves = createServerFn({ method: "POST" })
+export const analyzeStars = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => AnalyzeInput.parse(input))
-  .handler(async ({ data }): Promise<{ analysis?: WaveAnalysis; error?: string }> => {
+  .handler(async ({ data }): Promise<{ analysis?: StarAnalysis; error?: string }> => {
     const key = process.env['LOVABLE_API_KEY'];
     if (!key) return { error: "AI analysis is not configured for this workspace." };
 
@@ -89,7 +88,7 @@ export const analyzeWaves = createServerFn({ method: "POST" })
           content: [
             {
               type: "input_text",
-              text: "Analyze this ocean image. Count only distinct visible wave crests or coherent breaking-wave lines, not foam texture, ripples, shore edges, wakes, or duplicates. For every detected crest, trace it with 3 to 8 points. Coordinates must be percentages from 0 to 100 of image width and height. Confidence values must be from 0 to 1. Keep the summary under 24 words. Return JSON matching the schema.",
+              text: "Analyze this night-sky image. Count only distinct, visible point-light sources that look like stars. Ignore faint noise, lens artifacts, satellites, clouds, and duplicated detections. For each detected star, provide its center as a percentage of image width and height (0-100) and an approximate radius as a percentage of image width. Confidence values must be from 0 to 1. Keep the summary under 24 words. Return JSON matching the schema.",
             },
             { type: "input_image", image_url: data.imageDataUrl },
           ],
@@ -98,9 +97,9 @@ export const analyzeWaves = createServerFn({ method: "POST" })
       text: {
         format: {
           type: "json_schema",
-          name: "wave_analysis",
+          name: "star_analysis",
           strict: true,
-          schema: waveSchema,
+          schema: starSchema,
         },
       },
     };
@@ -129,21 +128,22 @@ export const analyzeWaves = createServerFn({ method: "POST" })
           // Keep the provider response as-is.
         }
         if ((response.status === 429 || response.status >= 500) && attempt < delays.length - 1) continue;
-        return { error: message || `Wave analysis failed (${response.status}).` };
+        return { error: message || `Star analysis failed (${response.status}).` };
       }
 
       const text = parseSseText(await response.text());
       if (!text) return { error: "The analysis completed without a result. Please try another image." };
       try {
-        const parsed = JSON.parse(text) as WaveAnalysis;
+        const parsed = JSON.parse(text) as StarAnalysis;
         const detections = parsed.detections.map((item, index) => ({
           ...item,
           id: index + 1,
           confidence: Math.max(0, Math.min(1, item.confidence)),
-          points: item.points.map((point) => ({
-            x: Math.max(0, Math.min(100, point.x)),
-            y: Math.max(0, Math.min(100, point.y)),
-          })),
+          center: {
+            x: Math.max(0, Math.min(100, item.center.x)),
+            y: Math.max(0, Math.min(100, item.center.y)),
+          },
+          radius: Math.max(0.2, Math.min(8, item.radius)),
         }));
         return {
           analysis: {
@@ -154,8 +154,8 @@ export const analyzeWaves = createServerFn({ method: "POST" })
           },
         };
       } catch {
-        return { error: "The wave map could not be read. Please retry the analysis." };
+        return { error: "The star map could not be read. Please retry the analysis." };
       }
     }
-    return { error: "Wave analysis is temporarily unavailable." };
+    return { error: "Star analysis is temporarily unavailable." };
   });

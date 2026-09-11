@@ -75,20 +75,16 @@ function Index() {
   };
 
   const runAnalysis = async () => {
-    console.log("runAnalysis started");
     setIsAnalyzing(true);
     setError("");
     setAnalysis(null);
     try {
       const imageDataUrl = await imageToDataUrl(image);
-      console.log("image converted", imageDataUrl.slice(0, 50));
       const result = await analyze({ data: { imageDataUrl } });
-      console.log("analyze result", result);
       if (result.error || !result.analysis) throw new Error(result.error || "No analysis returned.");
       setAnalysis(result.analysis);
       setShowOverlay(true);
     } catch (caught) {
-      console.error("runAnalysis error", caught);
       setError(caught instanceof Error ? caught.message : "The image could not be analyzed.");
     } finally {
       setIsAnalyzing(false);
