@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Wave Count Pro
+
+Build a clean, minimal wave counting web application. Users can upload an image of ocean waves (or sample wave images provided in-app), click 'Count Waves', and receive an AI-powered detection and count of visible wave crests/lines with an interactive visual overlay showing detected waves, total count, confidence summary, and details.
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://crest-counter.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/780ea2af-28a7-4ee7-b076-2ba6dd3a6546).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
